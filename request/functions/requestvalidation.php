@@ -9,7 +9,6 @@ $row = mysqli_fetch_assoc($result);
 
 # random control number
 $today = date('hi');
-echo $today;
 $rand = rand(1000, 9999);
 $random = ($rand);
 $clear_ctrlNo = $today. $random. substr($row['student_studNo'], 2, 2). substr($row['student_studNo'], 5, 5);
@@ -28,34 +27,32 @@ if(empty($clear_reqPurpose)){
 }
 else{
     mysqli_query($conn, "INSERT INTO t_clearance (clear_student, clear_ctrlNo, clear_reqType, clear_reqPurpose, clear_status, clear_dueDate, clear_dateFiled, 
-    clear_dateUpdated)
-    VALUES ('$clear_student', '$clear_ctrlNo', '$clear_reqType', '$clear_reqPurpose',0 ,DATE_ADD(CURDATE(),INTERVAL +2 MONTH), CURDATE(), null)")
+    clear_dateUpdated, clear_studAcadStatus)
+    VALUES ('$clear_student', '$clear_ctrlNo', '$clear_reqType', '$clear_reqPurpose',0 ,DATE_ADD(CURDATE(),INTERVAL +2 MONTH), CURDATE(), null, '$type[0]')")
     or die(mysqli_error($conn));
 
     $last_clearance_id = mysqli_insert_id($conn);
 
-    $max_office_id = mysqli_query($conn, "SELECT MAX(office_id) FROM s_office");
-    $max_row = mysqli_fetch_row($max_office_id);
+    $enrolled_id = mysqli_query($conn, "SELECT office_id FROM s_office WHERE office_category = 1");
+    $office_e_row = mysqli_fetch_all($enrolled_id);
 
-    $min_office_id = mysqli_query($conn, "SELECT MIN(office_id) FROM s_office");
-    $min_row = mysqli_fetch_row($min_office_id);
+    $graduate_id = mysqli_query($conn, "SELECT office_id FROM s_office");
+    $office_g_row = mysqli_fetch_all($graduate_id);
 
-    if($type[0] == "Graduated"){
-        for($x=$min_row[0]; $x<=$max_row[0]; $x++){
+    if($type[0] == "Graduated" || $type[0] == "Graduating" || $type[0] == "Honorable Dismissal"){
+        foreach($office_g_row as $g_office){
             mysqli_query($conn, "INSERT INTO t_clearance_office (clearOff_clearance, clearOff_office, clearOff_dateUpdated, clearOff_dateCreated, clearLogs_type)
-            VALUES ('$last_clearance_id', $x, null, CURDATE(), 'PENDING')")
+            VALUES ('$last_clearance_id', '$g_office[0]', null, CURDATE(), 'PENDING')")
             or die(mysqli_error($conn));
-            echo "Successfully tag as graduated";
+            header('location: ../index.php');
         }
     }
-    else if($type[0] == "Currently Enrolled"){
-        $min = intval($min_row[0])+1;
-        $max = intval($max_row[0])-1;
-        for($x=$min_row[0]+1; $x<=$max_row[0]-1; $x++){
+    else if($type[0]== "Currently Enrolled" || $type[0] == "Returnee"){
+        foreach($office_e_row as $e_office){
             mysqli_query($conn, "INSERT INTO t_clearance_office (clearOff_clearance, clearOff_office, clearOff_dateUpdated, clearOff_dateCreated, clearLogs_type)
-            VALUES ('$last_clearance_id', $x, null, CURDATE(), 'PENDING')")
+            VALUES ('$last_clearance_id', '$e_office[0]', null, CURDATE(), 'PENDING')")
             or die(mysqli_error($conn));
-            echo "Successfully tag as returnee";
+            header('location: ../index.php');
         }
     }
 }

@@ -148,8 +148,12 @@ session_start();
             <div class="input-group mb-3">
                 <select id="course" name="a_status" class="form-control"> 
                     <option value="" disabled selected>Status</option>
-                    <option value="Graduated">Graduated</option>
                     <option value="Currently Enrolled">Currently Enrolled</option>
+                    <option value="Returnee">Returnee</option>
+                    <option value="Graduating">Graduating</option>
+                    <option value="Honorable Dismissal">Honorable Dismissal</option>
+                    <option value="Graduated">Graduated</option>
+
                 </select>
             <div class="input-group-append">
                 <div class="input-group-text">
